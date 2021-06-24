@@ -1,0 +1,156 @@
+'Option Explicit
+
+Sub Main(courseName As Variant)
+
+    'plots data of course name
+    
+    On Error GoTo ErrHandler
+    
+    ' basis worksheet to reference for a specific value
+    Dim wsBase As Worksheet     ' define worksheet
+    Set wsBase = Worksheets(1)  ' set worksheet
+    
+    ' worksheet with button
+    Dim wsDest As Worksheet     ' define worksheet
+    Set wsDest = Worksheets(4)  ' set worksheet
+    
+    ' preliminary search for course to check whether it exists in search
+    Dim findCoursePrelim As Range
+    Set findCoursePrelim = FindAll(wsBase.Range("B:B"), courseName)
+    
+    If Not findCoursePrelim Is Nothing Then
+        
+        Dim cht As Chart    ' define a chart
+        
+        For sht = 1 To 3    ' loop through 3 data sheets
+            Set cht = wsDest.Shapes.AddChart2.Chart    ' change to Worksheets(4) or static sheet
+                    
+            ' current worksheet
+            Dim wst As Worksheet        ' define worksheet
+            Set wst = Worksheets(sht)   ' set value
+            
+            ' last column of data
+            Dim maxCol As Integer   ' define integer
+            maxCol = wst.Cells.Find(What:="*", After:=wst.Cells(1, 1), SearchOrder:=xlByColumns, SearchDirection:=xlPrevious).Column    ' set value
+        
+            ' start and end values of cells with data
+            xStart = wst.Cells(1, 5).Address(0, 0)                  ' set start integer
+            xEnd = wst.Cells(1, maxCol).Address(0, 0)               ' set end integer
+            
+            ' range of cells with correct course data
+            Dim findCourse As Range                                 ' define range
+            Set findCourse = FindAll(wst.Range("B:B"), courseName)  ' set range
+            
+            ' number of occurances of a specific course number
+            Dim numOccur As Integer                                 ' define integer
+            numOccur = findCourse.count                             ' set integer
+            
+            With cht    ' working with the chart
+                ' source data
+                .SetSourceData Source:=findCourse   '                                       ' set source data for chart
+                .SeriesCollection(1).XValues = wst.Range(xStart & ":" & xEnd)               ' set chart x values
+
+                .ChartType = xlLine                                                         ' set chart type
+                
+                ' title the chart
+                Dim strlen As Integer                                                       ' create integer for chart title length to remove
+                strlen = Len(wst.Name)                                                      ' set integer to corresponding value
+                .ChartTitle.Text = courseName & ": " & Mid(wst.Name, 12 + 1, strlen - 12)   ' title the chart
+                
+                ' populate series
+                For occurs = 1 To numOccur                                                  ' loop through all occurances of courseName
+                    .SeriesCollection.NewSeries                                             ' create new series
+                    ' insert series data
+                    .SeriesCollection(occurs).Values = wst.Range(Cells(findCourse(occurs).Row, 5).Address, Cells(findCourse(occurs).Row, maxCol).Address)
+                    ' title series name
+                    .SeriesCollection(occurs).Name = wst.Cells(findCourse(occurs).Row, 3) & "; " & wst.Cells(findCourse(occurs).Row, 4)
+                 Next occurs
+                 
+                 .SeriesCollection(numOccur + 1).Delete                                     ' delete extra series that is created for some reason
+                 
+                 ' Scale chart size
+                 Dim h, w As Integer            ' create height and width variables
+                 h = .ChartArea.Height          ' set height to current chart height
+                 w = .ChartArea.Width           ' set width to current chart width
+                 .ChartArea.Height = 1.25 * h   ' scale up chart height by 1.25
+                 .ChartArea.Width = 1.25 * w    ' scale up chart width by 1.25
+                 
+                 .HasLegend = True              ' turn on legend
+                            
+            End With
+            
+        Next
+        
+    Else
+        MsgBox (courseName & " not found.")
+    End If
+    
+    Debug.Print "Done (Main)"
+
+Exit Sub
+
+ErrHandler:
+    ' press F8 twice to go to error
+    Debug.Print Err.Number & ": " & Err.Description
+    Debug.Assert 0
+    Resume
+
+End Sub
+
+Function FindAll(rng As Range, searchFor As Variant) As Range
+    ' finds all instances of the string passed to it
+    
+    On Error GoTo ErrHandler
+    
+    Dim SearchResult As Range                                                                   ' create variable for the search result
+    Dim firstMatch As String                                                                    ' create variable for first matching result
+    
+    With rng
+        Set SearchResult = .Find(searchFor, LookIn:=xlValues, LookAt:=xlWhole, SearchOrder:=xlByRows, SearchDirection:=xlNext)  ' use Find to search
+        If Not SearchResult Is Nothing Then                                                     ' check if the search result has a value
+            firstMatch = SearchResult.Address                                                   ' store the cell address of the first match
+            Do
+                If FindAll Is Nothing Then                                                      ' check the storage array is empty
+                    Set FindAll = SearchResult                                                  ' if so, initialize array with the first search result
+                Else
+                    Set FindAll = Union(FindAll, SearchResult)                                  ' if not, append search result to array
+                End If
+                Set SearchResult = .FindNext(SearchResult)                                      ' define next search value with FindNext
+                
+            Loop While (Not SearchResult Is Nothing) And (SearchResult.Address <> firstMatch)   ' Do Loop repeat
+        End If
+    
+    End With
+    
+    Debug.Print "Done (FindAll)"
+    
+Exit Function
+
+ErrHandler:
+    ' press F8 twice to go to error
+    Debug.Print Err.Number & ": " & Err.Description
+    Debug.Assert 0
+    Resume
+
+End Function
+
+Sub Get_And_Run()
+    ' retrieves course string name from user and passes it to main plotting function
+    
+    On Error GoTo ErrHandler
+        
+    Dim courseName As String                                                                ' create variable for user to enter string into
+    courseName = Application.InputBox("Please enter a course name.", "Course Name Input")   ' use input box to retrieve user string
+    Call Main(courseName)                                                                   ' pass variable to main function
+    
+Exit Sub
+
+Debug.Print "Done (Get_And_Run)"
+
+ErrHandler:
+    ' press F8 twice to go to error
+    Debug.Print Err.Number & ": " & Err.Description
+    Debug.Assert 0
+    Resume
+
+End Sub

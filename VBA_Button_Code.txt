@@ -1,0 +1,38 @@
+Sub ButtonMacro()
+'
+' ButtonMacro Macro
+'
+
+'
+    Worksheets("ReadMe").Activate
+    ActiveSheet.Buttons.Add(240, 16.5, 96, 43.5).Select
+    Selection.OnAction = "Get_And_Run"
+    Selection.Characters.Text = "Button 1"
+    With Selection.Characters(Start:=1, Length:=8).Font
+        .Name = "Calibri"
+        .FontStyle = "Regular"
+        .Size = 11
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .ColorIndex = 1
+    End With
+    ActiveSheet.Shapes.SelectAll
+    Selection.Characters.Text = "View Course"
+    With Selection.Characters(Start:=1, Length:=11).Font
+        .Name = "Calibri"
+        .FontStyle = "Regular"
+        .Size = 11
+        .Strikethrough = False
+        .Superscript = False
+        .Subscript = False
+        .OutlineFont = False
+        .Shadow = False
+        .Underline = xlUnderlineStyleNone
+        .ColorIndex = 1
+    End With
+    Range("G6").Select
+End Sub
