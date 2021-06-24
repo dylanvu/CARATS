@@ -152,7 +152,7 @@ def condense_labs(data_fname, condense_fname):
     wb_obj.active = 3
     sheet_obj = wb_obj.active
     readme_cell = sheet_obj.cell(row=7, column=1)
-    readme_cell.value = open("ReadMe.txt", "r").read()
+    readme_cell.value = open("readme.md", "r").read()
     # alignment = Alignment(vertical="center", wrap_text=True)
     readme_cell.alignment = Alignment(vertical="center", wrap_text=True)
     sheet_obj.merge_cells("A7:K28")
