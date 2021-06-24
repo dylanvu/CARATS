@@ -11,6 +11,9 @@ Excel may add extra characters in courses that have spaces in them. For example,
 
 Thank you and we hope you find this tool useful!
 
+# Credits
+* Developed largely by Abhiram Devata with some help from Dylan Vu
+
 # Developers
 * Setting up the API Key
     1. Obtain the API Key
